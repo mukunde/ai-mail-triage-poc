@@ -1,4 +1,4 @@
-# Mail Triage POC — triage automatique des mails entrants (ADV / service client)
+# Mail Triage POC : triage automatique des mails entrants (ADV / service client)
 
 POC court (n8n + Claude) qui transforme un flux de mails entrants en sorties
 qualifiées et routées : **catégorie, champs extraits, résumé, action proposée,
@@ -38,7 +38,7 @@ Sortie / route vers le service (ADV, SAV, Commercial, Archivage...)
 
 ## Lancer
 
-### Option A — exécuter le workflow n8n
+### Option A : exécuter le workflow n8n
 
 ```bash
 # 1. clé API (jamais commitée)
@@ -51,7 +51,7 @@ Puis dans n8n : **Import from File** -> `workflows/mail-triage.json`, ouvrir le
 workflow et cliquer **Execute workflow**. Chaque mail ressort classé, extrait,
 résumé et routé.
 
-### Option B — mesurer (grille d'évaluation)
+### Option B : mesurer (grille d'évaluation)
 
 ```bash
 python eval/eval.py             # Claude si ANTHROPIC_API_KEY est défini, sinon baseline
