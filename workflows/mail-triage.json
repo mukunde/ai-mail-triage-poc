@@ -1,0 +1,79 @@
+{
+  "name": "Mail triage ADV",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Demo loader: a few inbound mails. In production this node is replaced by an\n// IMAP / Gmail trigger. The full synthetic corpus lives in data/sample_mails.json.\nconst SYSTEM = \"Tu es l'assistant de triage du service client / ADV d'un vendeur de cuisines. On te donne un mail entrant. Classe-le dans EXACTEMENT une de ces categories: demande_devis, relance_devis, reclamation, demande_information, suivi_commande, annulation, spam, autre. Extrais les champs cles s'ils sont presents (order_ref, quote_ref, budget, contact), sinon null, n'invente rien. Resume en une phrase et propose une action concrete. Reponds UNIQUEMENT par un objet JSON {category, fields:{order_ref,quote_ref,budget,contact}, summary, proposed_action, confidence}. confidence entre 0 et 1.\";\nconst mails = [\n  { id: 'm1', from: 'claire.durand@example.com', subject: 'Demande de devis cuisine', body: \"Bonjour, nous avons visite votre magasin samedi. Pourriez-vous m'etablir un devis pour la cuisine modele Lina en 3m20 ? Budget environ 8000 euros. Claire Durand, 06 12 34 56 78.\" },\n  { id: 'm3', from: 'sophie.leroy@example.com', subject: 'Probleme porte de meuble cassee', body: 'Bonjour, la cuisine a ete installee mardi mais une porte est fendue et un tiroir ne coulisse pas. Je demande une intervention rapide. Commande CDE-77831. Sophie Leroy.' },\n  { id: 'm6', from: 'newsletter@fournisseur-pub.example', subject: 'Offres pros -30%', body: 'Profitez de -30% sur nos plans de travail ce mois-ci. Cliquez pour le catalogue pro.' }\n];\nreturn mails.map(m => ({ json: { id: m.id, from: m.from, subject: m.subject, body: m.body, anthropicBody: { model: 'claude-opus-4-8', max_tokens: 512, system: SYSTEM, messages: [ { role: 'user', content: 'Sujet: ' + m.subject + '\\n\\n' + m.body } ] } } }));"
+      },
+      "id": "load-001",
+      "name": "Charger les mails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.anthropicBody) }}",
+        "options": {}
+      },
+      "id": "claude-001",
+      "name": "Classifier (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deterministic routing (business rules stay auditable; the LLM only understands).\nconst ROUTE = { demande_devis: 'ADV / Commercial', relance_devis: 'ADV / Commercial', annulation: 'ADV', suivi_commande: 'ADV / Logistique', demande_information: 'Commercial', reclamation: 'SAV', spam: 'Archivage', autre: 'Tri manuel' };\nconst text = ($json.content && $json.content[0]) ? $json.content[0].text : '{}';\nlet p;\ntry { p = JSON.parse(text); } catch (e) { p = { category: 'autre', fields: {}, summary: '', proposed_action: '', confidence: 0 }; }\nconst src = $('Charger les mails').item.json;\nreturn [{ json: { id: src.id, from: src.from, subject: src.subject, category: p.category, route: ROUTE[p.category] || 'Tri manuel', fields: p.fields, summary: p.summary, proposed_action: p.proposed_action, confidence: p.confidence } }];"
+      },
+      "id": "route-001",
+      "name": "Parser + router",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {},
+      "id": "out-001",
+      "name": "Sortie",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [[{ "node": "Charger les mails", "type": "main", "index": 0 }]]
+    },
+    "Charger les mails": {
+      "main": [[{ "node": "Classifier (Claude)", "type": "main", "index": 0 }]]
+    },
+    "Classifier (Claude)": {
+      "main": [[{ "node": "Parser + router", "type": "main", "index": 0 }]]
+    },
+    "Parser + router": {
+      "main": [[{ "node": "Sortie", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false
+}

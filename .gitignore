@@ -1,0 +1,11 @@
+# Secrets
+.env
+*.key
+
+# n8n local data volume
+n8n_data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

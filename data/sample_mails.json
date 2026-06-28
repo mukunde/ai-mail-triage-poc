@@ -1,0 +1,58 @@
+[
+  {
+    "id": "m1",
+    "from": "claire.durand@example.com",
+    "subject": "Demande de devis cuisine",
+    "received_at": "2026-06-22T09:14:00",
+    "body": "Bonjour, nous avons visite votre magasin samedi. Pourriez-vous m'etablir un devis pour la cuisine modele Lina en 3m20, avec four encastrable et plan de travail quartz ? Notre budget est d'environ 8000 euros. Merci d'avance. Claire Durand, 06 12 34 56 78."
+  },
+  {
+    "id": "m2",
+    "from": "p.martin@example.com",
+    "subject": "Relance devis n12048",
+    "received_at": "2026-06-22T10:02:00",
+    "body": "Bonjour, je reviens vers vous concernant le devis 12048 envoye il y a deux semaines. Avez-vous pu avancer ? Nous aimerions valider la commande avant la fin du mois. Cordialement, P. Martin."
+  },
+  {
+    "id": "m3",
+    "from": "sophie.leroy@example.com",
+    "subject": "Probleme porte de meuble cassee",
+    "received_at": "2026-06-22T11:48:00",
+    "body": "Bonjour, la cuisine a ete installee mardi mais une porte du meuble haut est fendue et un tiroir ne coulisse pas. C'est inacceptable vu le prix paye. Je demande une intervention rapide. Commande CDE-77831. Sophie Leroy."
+  },
+  {
+    "id": "m4",
+    "from": "info-seeker@example.com",
+    "subject": "Question delais et materiaux",
+    "received_at": "2026-06-22T12:30:00",
+    "body": "Bonjour, avant de me deplacer en magasin, quels sont vos delais moyens de pose et proposez-vous des facades sans formaldehyde ? Merci."
+  },
+  {
+    "id": "m5",
+    "from": "j.bernard@example.com",
+    "subject": "Ou en est ma commande ?",
+    "received_at": "2026-06-22T13:05:00",
+    "body": "Bonjour, ma commande CDE-78002 reglee le 2 juin etait annoncee sous 4 semaines. Auriez-vous une date de livraison ? Merci. J. Bernard."
+  },
+  {
+    "id": "m6",
+    "from": "newsletter@fournisseur-pub.example",
+    "subject": "Offres pros - plans de travail -30%",
+    "received_at": "2026-06-22T07:10:00",
+    "body": "Profitez de -30% sur notre gamme de plans de travail stratifies ce mois-ci. Cliquez pour decouvrir le catalogue pro."
+  },
+  {
+    "id": "m7",
+    "from": "famille.petit@example.com",
+    "subject": "Devis + question financement",
+    "received_at": "2026-06-22T14:20:00",
+    "body": "Bonjour, suite a notre rendez-vous, merci de nous chiffrer la cuisine en L avec ilot central (env. 12 m2). Proposez-vous un paiement en plusieurs fois ? Budget cible 15000 euros. Famille Petit."
+  },
+  {
+    "id": "m8",
+    "from": "a.moreau@example.com",
+    "subject": "Annulation possible ?",
+    "received_at": "2026-06-22T15:40:00",
+    "body": "Bonjour, j'ai signe un bon de commande lundi (CDE-78110) mais ma situation a change. Est-il possible d'annuler ou de reporter la livraison ? Merci de me rappeler. A. Moreau."
+  }
+]

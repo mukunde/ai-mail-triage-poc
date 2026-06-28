@@ -1,0 +1,14 @@
+# Run n8n locally to import and execute workflows/mail-triage.json.
+# Set ANTHROPIC_API_KEY in a local .env (next to this file) so the workflow's
+# {{ $env.ANTHROPIC_API_KEY }} expression resolves inside n8n.
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_SECURE_COOKIE=false
+      - GENERIC_TIMEZONE=Europe/Paris
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ./n8n_data:/home/node/.n8n
