@@ -51,6 +51,11 @@ Puis dans n8n : **Import from File** -> `workflows/mail-triage.json`, ouvrir le
 workflow et cliquer **Execute workflow**. Chaque mail ressort classé, extrait,
 résumé et routé.
 
+> Le workflow lit la clé via `{{ $env.ANTHROPIC_API_KEY }}`. Le `docker-compose`
+> active `N8N_BLOCK_ENV_ACCESS_IN_NODE=false` pour autoriser cet accès dans les
+> expressions (sinon n8n le bloque par défaut). Vérifié en exécution réelle sur
+> n8n 2.27.
+
 ### Option B : mesurer (grille d'évaluation)
 
 ```bash

@@ -9,6 +9,8 @@ services:
     environment:
       - N8N_SECURE_COOKIE=false
       - GENERIC_TIMEZONE=Europe/Paris
+      # Allow {{ $env.ANTHROPIC_API_KEY }} inside the workflow expressions.
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     volumes:
       - ./n8n_data:/home/node/.n8n
