@@ -1,0 +1,90 @@
+{
+  "id": "MailTriageIMAP1",
+  "name": "Triage + ingestion (IMAP -> Alfred)",
+  "nodes": [
+    {
+      "parameters": {
+        "mailbox": "INBOX",
+        "postProcessAction": "read",
+        "format": "simple",
+        "options": {}
+      },
+      "id": "imap-trigger",
+      "name": "Mails entrants (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the classification request from the received email.\nconst SYSTEM = \"Tu es l'assistant de triage du service client / ADV d'un vendeur de cuisines. On te donne un mail entrant. Classe-le dans EXACTEMENT une de ces categories: demande_devis, relance_devis, reclamation, demande_information, suivi_commande, annulation, spam, autre. Extrais les champs cles s'ils sont presents (order_ref, quote_ref, budget, contact), sinon null, n'invente rien. Resume en une phrase et propose une action concrete. Reponds UNIQUEMENT par un objet JSON {category, fields:{order_ref,quote_ref,budget,contact}, summary, proposed_action, confidence}. confidence entre 0 et 1.\";\nconst subject = $json.subject || '';\nconst body = $json.textPlain || $json.text || '';\nconst from = (typeof $json.from === 'string') ? $json.from : ($json.from && $json.from.text) || '';\nreturn [{ json: { subject, from, body, anthropicBody: { model: 'claude-opus-4-8', max_tokens: 512, system: SYSTEM, messages: [ { role: 'user', content: 'Sujet: ' + subject + '\\n\\n' + body } ] } } }];"
+      },
+      "id": "prep",
+      "name": "Preparer pour Claude",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.anthropicBody) }}",
+        "options": {}
+      },
+      "id": "claude",
+      "name": "Classifier (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ROUTE = { demande_devis: 'ADV / Commercial', relance_devis: 'ADV / Commercial', annulation: 'ADV', suivi_commande: 'ADV / Logistique', demande_information: 'Commercial', reclamation: 'SAV', spam: 'Archivage', autre: 'Tri manuel' };\nconst text = ($json.content && $json.content[0]) ? $json.content[0].text : '{}';\nlet p;\ntry { p = JSON.parse(text); } catch (e) { p = { category: 'autre', fields: {}, summary: '', proposed_action: '', confidence: 0 }; }\nconst src = $('Preparer pour Claude').item.json;\nreturn [{ json: { subject: src.subject, from: src.from, category: p.category, route: ROUTE[p.category] || 'Tri manuel', fields: p.fields, summary: p.summary, proposed_action: p.proposed_action, confidence: p.confidence } }];"
+      },
+      "id": "route",
+      "name": "Parser + router",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Bridge to Alfred (running on the host): one discovery session, one signal per\n// triaged mail, then trigger detection. host.docker.internal reaches the host.\nconst base = 'http://host.docker.internal:8000';\nconst items = $input.all();\nconst session = await this.helpers.httpRequest({ method: 'POST', url: base + '/discovery', body: { title: 'Service ADV (mails entrants)', message: 'Signaux issus du triage automatique des mails entrants.' }, json: true });\nfor (const it of items) {\n  await this.helpers.httpRequest({ method: 'POST', url: base + '/discovery/' + session.id + '/signal', body: { label: it.json.category, value: it.json.summary || it.json.subject || '' }, json: true });\n}\nawait this.helpers.httpRequest({ method: 'POST', url: base + '/discovery/' + session.id + '/detect', json: true });\nconst candidates = await this.helpers.httpRequest({ method: 'GET', url: base + '/discovery/' + session.id + '/opportunities', json: true });\nreturn [{ json: { sessionId: session.id, ingested: items.length, candidates } }];"
+      },
+      "id": "ingest",
+      "name": "Ingestion vers Alfred",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Mails entrants (IMAP)": {
+      "main": [[{ "node": "Preparer pour Claude", "type": "main", "index": 0 }]]
+    },
+    "Preparer pour Claude": {
+      "main": [[{ "node": "Classifier (Claude)", "type": "main", "index": 0 }]]
+    },
+    "Classifier (Claude)": {
+      "main": [[{ "node": "Parser + router", "type": "main", "index": 0 }]]
+    },
+    "Parser + router": {
+      "main": [[{ "node": "Ingestion vers Alfred", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false,
+  "versionId": "1",
+  "meta": {},
+  "tags": []
+}
