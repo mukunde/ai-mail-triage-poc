@@ -24,7 +24,7 @@ est le **nom de service `greenmail`** (réseau Docker interne), pas `localhost`.
 | Credential | Type | Host | Port | SSL/TLS | User / Pass |
 | ---------- | ---- | ---- | ---- | ------- | ----------- |
 | GreenMail SMTP | SMTP | `greenmail` | `3025` | off | `test` / `test` |
-| GreenMail IMAP | IMAP | `greenmail` | `3143` | off | `adv@schmidt.test` / `test` |
+| GreenMail IMAP | IMAP | `greenmail` | `3143` | off | `adv@cuisines.test` / `test` |
 
 Puis **Import from File** des trois workflows de `workflows/` :
 

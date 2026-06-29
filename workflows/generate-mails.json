@@ -55,7 +55,7 @@
     {
       "parameters": {
         "fromEmail": "={{ $json.from }}",
-        "toEmail": "adv@schmidt.test",
+        "toEmail": "adv@cuisines.test",
         "subject": "={{ $json.subject }}",
         "emailFormat": "text",
         "text": "={{ $json.body }}",
