@@ -1,11 +1,11 @@
 {
   "id": "GenMailsADV01",
-  "name": "Generateur de mails de test",
+  "name": "1. Générer des mails clients de test",
   "nodes": [
     {
       "parameters": {},
       "id": "gen-trigger",
-      "name": "When clicking 'Execute workflow'",
+      "name": "Démarrer la génération",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [240, 300]
@@ -15,7 +15,7 @@
         "jsCode": "// Build the Anthropic request that asks Claude for a varied batch of mails.\nconst SYSTEM = \"Tu generes des mails clients realistes et varies en francais pour le service ADV d'un vendeur de cuisines. Produis EXACTEMENT un tableau JSON de 6 objets {from, subject, body}, sans aucun texte autour. Varie les categories: demande de devis, relance de devis, reclamation/SAV (avec une reference commande type CDE-78xxx), demande d'information avant-vente, suivi de commande, annulation, et au moins un spam publicitaire. Ton naturel, 2 a 4 phrases, signatures plausibles, adresses en @example.com.\";\nreturn [{ json: { anthropicBody: { model: 'claude-opus-4-8', max_tokens: 2000, system: SYSTEM, messages: [ { role: 'user', content: 'Genere le lot de mails maintenant.' } ] } } }];"
       },
       "id": "gen-prep",
-      "name": "Preparer la requete",
+      "name": "Préparer la demande à l'IA",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [460, 300]
@@ -37,7 +37,7 @@
         "options": {}
       },
       "id": "gen-claude",
-      "name": "Generer (Claude)",
+      "name": "Rédiger les mails (IA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [680, 300]
@@ -47,7 +47,7 @@
         "jsCode": "// Parse Claude's JSON array into one n8n item per mail.\nconst text = ($json.content && $json.content[0]) ? $json.content[0].text : '[]';\nconst clean = text.replace(/^```(json)?/m, '').replace(/```$/m, '').trim();\nlet arr;\ntry { arr = JSON.parse(clean); } catch (e) { arr = []; }\nreturn arr.map(m => ({ json: { from: m.from || 'client@example.com', subject: m.subject || '(sans objet)', body: m.body || '' } }));"
       },
       "id": "gen-split",
-      "name": "Eclater en mails",
+      "name": "Séparer en mails individuels",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [900, 300]
@@ -62,24 +62,24 @@
         "options": {}
       },
       "id": "gen-send",
-      "name": "Envoyer vers GreenMail",
+      "name": "Déposer dans la boîte mail de test",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [1120, 300]
     }
   ],
   "connections": {
-    "When clicking 'Execute workflow'": {
-      "main": [[{ "node": "Preparer la requete", "type": "main", "index": 0 }]]
+    "Démarrer la génération": {
+      "main": [[{ "node": "Préparer la demande à l'IA", "type": "main", "index": 0 }]]
     },
-    "Preparer la requete": {
-      "main": [[{ "node": "Generer (Claude)", "type": "main", "index": 0 }]]
+    "Préparer la demande à l'IA": {
+      "main": [[{ "node": "Rédiger les mails (IA)", "type": "main", "index": 0 }]]
     },
-    "Generer (Claude)": {
-      "main": [[{ "node": "Eclater en mails", "type": "main", "index": 0 }]]
+    "Rédiger les mails (IA)": {
+      "main": [[{ "node": "Séparer en mails individuels", "type": "main", "index": 0 }]]
     },
-    "Eclater en mails": {
-      "main": [[{ "node": "Envoyer vers GreenMail", "type": "main", "index": 0 }]]
+    "Séparer en mails individuels": {
+      "main": [[{ "node": "Déposer dans la boîte mail de test", "type": "main", "index": 0 }]]
     }
   },
   "settings": { "executionOrder": "v1" },

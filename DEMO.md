@@ -28,8 +28,8 @@ est le **nom de service `greenmail`** (réseau Docker interne), pas `localhost`.
 
 Puis **Import from File** des trois workflows de `workflows/` :
 
-- `generate-mails.json` (assigner la credential SMTP au noeud "Envoyer vers GreenMail")
-- `mail-triage-imap.json` (assigner la credential IMAP au trigger "Mails entrants (IMAP)")
+- `generate-mails.json` (assigner la credential SMTP au noeud « Déposer dans la boîte mail de test »)
+- `mail-triage-imap.json` (assigner la credential IMAP au trigger « Recevoir les nouveaux mails (boîte de test) »)
 - `mail-triage.json` (variante standalone, sans IMAP, pour un test rapide)
 
 La clé Anthropic est lue via `{{ $env.ANTHROPIC_API_KEY }}` (déjà passée par le
@@ -37,15 +37,15 @@ compose), aucun credential à créer pour ça.
 
 ## Dérouler la démo
 
-1. **Activer** le workflow "Triage + ingestion (IMAP -> Alfred)" (toggle Active) :
-   le trigger IMAP se met à écouter la boîte.
-2. Ouvrir "Generateur de mails de test" -> **Execute workflow** : Claude rédige 6
-   mails ADV variés, envoyés dans GreenMail.
+1. **Activer** le workflow « 2. Trier les mails et alimenter l'assistant »
+   (toggle Active) : le trigger IMAP se met à écouter la boîte.
+2. Ouvrir « 1. Générer des mails clients de test » -> **Execute workflow** :
+   Claude rédige 6 mails ADV variés, envoyés dans GreenMail.
 3. Au cycle de poll suivant, le triage se déclenche tout seul : il récupère les
-   mails, les classe/extrait/route, puis le noeud "Ingestion vers Alfred" crée une
-   session de découverte, pousse un signal par mail et lance la détection.
-4. La sortie du noeud "Ingestion vers Alfred" montre `sessionId` + les
-   `candidates` détectées.
+   mails, les classe/extrait/route, puis le noeud « Transmettre à l'assistant de
+   qualification » crée une session de découverte, pousse un signal par mail et
+   lance la détection.
+4. La sortie de ce noeud montre `sessionId` + les `candidates` détectées.
 5. Dans l'assistant (UI) : **Découverte** -> ouvrir la session (COMPLETED, avec ses
    opportunités) -> **Promouvoir** une candidate -> **Décision** (score, reco,
    revue humaine) -> **Portfolio** -> **Dossier de reprise** (PRD/TRD/roadmap...).
