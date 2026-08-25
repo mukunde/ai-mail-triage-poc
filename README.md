@@ -153,3 +153,7 @@ Next.js.
 - Données synthétiques (à l'aveugle) : rejouer sur un corpus réel anonymisé.
 - Remplacer GreenMail par un vrai trigger **IMAP / Gmail** en production.
 - Brancher la sortie sur l'outil cible (ticket, file ADV) une fois validé.
+
+## Licence
+
+[MIT](LICENSE)
